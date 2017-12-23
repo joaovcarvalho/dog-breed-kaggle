@@ -13,7 +13,7 @@ df_test = pd.read_csv('./sample_submission.csv')
 
 targets_series = pd.Series(df_train['breed'])
 
-# One hot enconding for the targes
+# One hot encoding for the targets
 # breed0 -> [1,0,0,0,...,0]
 one_hot = pd.get_dummies(targets_series, sparse=True)
 one_hot_labels = np.asarray(one_hot)
@@ -35,21 +35,14 @@ for f, breed in tqdm(df_train.values):
     y_train.append(label)
     i += 1
 
-# Load the data for the test dataset
-for f in tqdm(df_test['id'].values):
-    img = cv2.imread('./test/{}.jpg'.format(f))
-    x_test.append(cv2.resize(img, (im_size, im_size)))
-
 # Convert values to correct type for optimizations
 y_train_raw = np.array(y_train, np.uint8)
 x_train_raw = np.array(x_train, np.float32)
-x_test = np.array(x_test, np.float32)
 
 # Data normalization
 mean = x_train_raw.mean()
 std = x_train_raw.std()
 x_train_raw = (x_train_raw - mean) / std
-x_test = (x_test - mean) / std
 
 # Printing the shape of the datasets
 print(x_train_raw.shape)
@@ -88,6 +81,14 @@ model.summary()
 
 # Fitting the model
 model.fit(X_train, Y_train, epochs=10, validation_data=(X_valid, Y_valid), verbose=1, callbacks=callbacks_list)
+
+# Load the data for the test dataset
+for f in tqdm(df_test['id'].values):
+    img = cv2.imread('./test/{}.jpg'.format(f))
+    x_test.append(cv2.resize(img, (im_size, im_size)))
+
+x_test = np.array(x_test, np.float32)
+x_test = (x_test - mean) / std
 
 # Making predictions about the test data
 predictions = model.predict(x_test, verbose=1)
