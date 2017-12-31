@@ -1,6 +1,7 @@
 train/
 test/
 *.csv
+*.zip
 .idea/
 *.h5
 .DS_Store
